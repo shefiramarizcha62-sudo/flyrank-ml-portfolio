@@ -1,0 +1,19 @@
+{
+  "queue_rows": 331436,
+  "unique_client_content_pairs": 331436,
+  "model_score_min": 0.0022010023805865715,
+  "model_score_max": 0.9894982717221674,
+  "model_score_median": 0.06571961267123398,
+  "model_score_mean": 0.3000165430964432,
+  "action_distribution": {
+    "NO_ACTION": 191301,
+    "REVIEW_CTR": 86158,
+    "REVIEW": 53977
+  },
+  "reason_code_distribution": {
+    "REVIEW": 191301,
+    "HIGH_VISIBILITY": 53977,
+    "HIGH_IMPRESSIONS_LOW_CTR": 47255,
+    "GOOD_POSITION_LOW_CTR": 38903
+  }
+}
