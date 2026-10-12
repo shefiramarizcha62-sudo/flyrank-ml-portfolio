@@ -1,6 +1,6 @@
 # Content Opportunity Scoring for Search Performance
 
-**Author: Shefira Marizcha**  
+**Author:** Shefira Marizcha  
 **Lane:** Refresh / Content Opportunity Scoring  
 **Repo:** https://github.com/shefiramarizcha62-sudo/flyrank-ml-portfolio.git  
 **Date:** 13-October-2026
@@ -31,18 +31,19 @@ The March dataset contains 9,841,378 raw records, which were aggregated into 331
 
 **Table 1. Dataset Overview**
 
-| Attribute | Description | Value |
-|---|---|---:|
-| Dataset | FlyRank internship warehouse | — |
-| Source table | `fact_content_daily_performance` | — |
-| March observation period | March 1–31, 2026 | — |
-| April outcome period | April 1–30, 2026 | — |
-| March raw records | Raw March observations | 9,841,378 |
-| April raw records | Raw April observations | 10,424,730 |
-| March aggregated pairs | Aggregated client-content pairs | 331,437 |
-| Final modeling pairs | Pairs remaining after March-April join | 331,436 |
-| Input features | March performance features | 6 |
-| Missing `gsc_avg_position` | Missing values in the modeling dataset | 154,699 (46.68%) |
+| Attribute | Value |
+|---|---|
+| Dataset | `FlyRank/internship-warehouse` |
+| Source table | `fact_content_daily_performance` |
+| Observation period | March 1–31, 2026 |
+| Outcome period | April 1–30, 2026 |
+| March raw records | 9,841,378 |
+| April raw records | 10,424,730 |
+| March aggregated pairs | 331,437 |
+| Final modeling pairs | 331,436 |
+| Unique client-content pairs | 331,436 |
+| Input features | 6 |
+| Missing `gsc_avg_position` | 46.68% (154,699 values) |
 
 March features were constructed by aggregating impressions, clicks, pageviews, and engaged sessions using summation, while average search position was calculated using the mean. March CTR was calculated as clicks divided by impressions, with zero assigned when impressions were zero. The April outcome was constructed from aggregated impressions and clicks.
 
@@ -95,28 +96,28 @@ The target distribution consisted of 280,002 negative observations (84.48%) and 
 
 **Table 2. Target Class Distribution**
 
-| Target Class | Number of Observations | Percentage |
+| Target Class | Count | Percentage |
 |---|---:|---:|
-| Negative (No Future Opportunity) | 280,002 | 84.48% |
-| Positive (Future Opportunity) | 51,434 | 15.52% |
+| No Opportunity | 280,002 | 84.48% |
+| Future Opportunity | 51,434 | 15.52% |
 | **Total** | **331,436** | **100.00%** |
 
 The Random Forest achieved a ROC-AUC of 0.921432 and an Average Precision of 0.680600. The rule-based baseline achieved a ROC-AUC of 0.738707 and an Average Precision of 0.318966 on the same test set.
 
 **Table 3. Model Performance Comparison**
 
-| Model | ROC-AUC | Average Precision |
+| Experiment | ROC-AUC | Average Precision |
 |---|---:|---:|
 | Rule-Based Baseline | 0.738707 | 0.318966 |
 | Random Forest | **0.921432** | **0.680600** |
 
-[01_model_performance_comparison.png]
+**[!!GRAFIK 1 - 01_model_performance_comparison.png]**
 
 *Figure 1. Performance comparison between the rule-based baseline and Random Forest.*
 
 At a classification threshold of 0.5, the Random Forest achieved an accuracy of 0.832379, precision of 0.509681, recall of 0.932015, and F1-score of 0.658988.
 
-**Table 4. Random Forest Classification Metrics at Threshold 0.5**
+**Table 4. Random Forest Classification Metrics**
 
 | Metric | Value |
 |---|---:|
@@ -125,7 +126,7 @@ At a classification threshold of 0.5, the Random Forest achieved an accuracy of 
 | Recall | 0.932015 |
 | F1-score | 0.658988 |
 
-[02_classification_metrics.png]
+**[!!GRAFIK 2 - 02_classification_metrics.png]**
 
 *Figure 2. Classification metrics of the Random Forest model at a threshold of 0.5.*
 
@@ -138,7 +139,7 @@ The confusion matrix contained 20,486 true negatives, 4,761 false positives, 361
 | **Negative** | 20,486 (TN) | 4,761 (FP) |
 | **Positive** | 361 (FN) | 4,949 (TP) |
 
-[03_confusion_matrix.png]
+**[!!GRAFIK 3 - 03_confusion_matrix.png]**
 
 *Figure 3. Confusion matrix of the Random Forest classifier at a threshold of 0.5.*
 
@@ -148,16 +149,16 @@ The feature importance results indicate that `gsc_impressions` contributed the l
 
 **Table 6. Random Forest Feature Importance**
 
-| Feature | Importance | Percentage |
+| Feature | Importance | Importance (%) |
 |---|---:|---:|
-| `gsc_impressions` | 0.618917 | 61.89% |
-| `gsc_avg_position` | 0.179190 | 17.92% |
-| `march_ctr` | 0.102720 | 10.27% |
-| `gsc_clicks` | 0.069861 | 6.99% |
-| `ga4_pageviews` | 0.026835 | 2.68% |
-| `ga4_engaged_sessions` | 0.002477 | 0.25% |
+| `gsc_impressions` | 0.618917 | 61.89 |
+| `gsc_avg_position` | 0.179190 | 17.92 |
+| `march_ctr` | 0.102720 | 10.27 |
+| `gsc_clicks` | 0.069861 | 6.99 |
+| `ga4_pageviews` | 0.026835 | 2.68 |
+| `ga4_engaged_sessions` | 0.002477 | 0.25 |
 
-[04_feature_importance.png]
+**[!!GRAFIK 4 - 04_feature_importance.png]**
 
 *Figure 4. Relative feature importance in the Random Forest model.*
 
@@ -182,7 +183,7 @@ The queue contains three recommended action categories: `NO_ACTION`, `REVIEW_CTR
 | `REVIEW` | 53,977 | 16.29% |
 | **Total** | **331,436** | **100.00%** |
 
-[06_recommended_action_distribution.png]
+**[!!GRAFIK 5 - 06_recommended_action_distribution.png]**
 
 *Figure 5. Distribution of recommended actions in the ranked action queue.*
 
@@ -203,7 +204,7 @@ Reason codes provide additional context for human reviewers:
 | `GOOD_POSITION_LOW_CTR` | 38,903 |
 | **Total** | **331,436** |
 
-[05_reason_code_distribution.png]
+**[!!GRAFIK 6 - 05_reason_code_distribution.png]**
 
 *Figure 6. Distribution of reason codes in the ranked action queue.*
 
