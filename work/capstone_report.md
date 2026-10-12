@@ -214,13 +214,15 @@ The ranked queue is a retrospective decision-support artifact generated using th
 
 ## 8. Reproducibility
 
-The experiments were implemented in a Python notebook using a repeatable data-processing and machine learning workflow. The client-grouped split and Random Forest configuration used a random state of 42.
+The project is organized into separate notebooks for each internship assignment and the final capstone implementation. The weekly notebooks (W1–W7) and the capstone notebook are stored in `work/notebooks/`, while the research report and visualization assets are maintained in `work/`.
 
-The reproducibility package should include the capstone notebook, the weekly assignment notebooks, the exported aggregate tables, and the privacy-safe figures used in this report.
+The project dependencies are documented in the root-level `requirements.txt`, including pandas, NumPy, scikit-learn, Matplotlib, ReportLab, DuckDB, and Hugging Face Hub. The listed versions specify minimum requirements rather than exact pinned versions.
 
-The final repository should provide the notebook and supporting files required to reproduce the data preparation, baseline scoring, model training, evaluation, and ranked recommendation workflow.
+The modeling workflow uses a client-grouped train-test split with `GroupShuffleSplit`, configured with `test_size=0.20` and `random_state=42`. The Random Forest model uses 200 estimators, a maximum depth of 12, and a minimum of 20 samples per leaf. Median imputation is integrated into a scikit-learn Pipeline to ensure that imputation parameters are learned from the training data.
 
-Exact execution commands, dependency versions, and repository paths will be documented after the final repository structure and environment have been verified.
+Dataset access requires the appropriate Hugging Face permissions and authentication. The access token is managed through Google Colab Secrets rather than being stored directly in the notebook.
+
+The evaluation represents one client-grouped holdout split using March features and April outcomes. It is not a sealed evaluation or a time-series validation across multiple periods. Reproducing the results requires access to the dataset, the required credentials, and a compatible Python environment.
 
 ## 9. Acknowledgments & data credit
 
