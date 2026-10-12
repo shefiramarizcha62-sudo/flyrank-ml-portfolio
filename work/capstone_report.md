@@ -111,7 +111,7 @@ The Random Forest achieved a ROC-AUC of 0.921432 and an Average Precision of 0.6
 | Rule-Based Baseline | 0.738707 | 0.318966 |
 | Random Forest | **0.921432** | **0.680600** |
 
-**[!!GRAFIK 1 - 01_model_performance_comparison.png]**
+![Figure 1. Model Performance Comparison](figures/01_model_performance_comparison.png)
 
 *Figure 1. Performance comparison between the rule-based baseline and Random Forest.*
 
@@ -126,7 +126,7 @@ At a classification threshold of 0.5, the Random Forest achieved an accuracy of 
 | Recall | 0.932015 |
 | F1-score | 0.658988 |
 
-**[!!GRAFIK 2 - 02_classification_metrics.png]**
+![Figure 2. Classification Metrics](figures/02_classification_metrics.png)
 
 *Figure 2. Classification metrics of the Random Forest model at a threshold of 0.5.*
 
@@ -139,7 +139,7 @@ The confusion matrix contained 20,486 true negatives, 4,761 false positives, 361
 | **Negative** | 20,486 (TN) | 4,761 (FP) |
 | **Positive** | 361 (FN) | 4,949 (TP) |
 
-**[!!GRAFIK 3 - 03_confusion_matrix.png]**
+![Figure 3. Confusion Matrix](figures/03_confusion_matrix.png)
 
 *Figure 3. Confusion matrix of the Random Forest classifier at a threshold of 0.5.*
 
@@ -158,7 +158,7 @@ The feature importance results indicate that `gsc_impressions` contributed the l
 | `ga4_pageviews` | 0.026835 | 2.68 |
 | `ga4_engaged_sessions` | 0.002477 | 0.25 |
 
-**[!!GRAFIK 4 - 04_feature_importance.png]**
+![Figure 4. Feature Importance](figures/04_feature_importance.png)
 
 *Figure 4. Relative feature importance in the Random Forest model.*
 
@@ -183,7 +183,7 @@ The queue contains three recommended action categories: `NO_ACTION`, `REVIEW_CTR
 | `REVIEW` | 53,977 | 16.29% |
 | **Total** | **331,436** | **100.00%** |
 
-**[!!GRAFIK 5 - 06_recommended_action_distribution.png]**
+![Figure 5. Recommended Action Distribution](figures/06_recommended_action_distribution.png)
 
 *Figure 5. Distribution of recommended actions in the ranked action queue.*
 
@@ -204,7 +204,7 @@ Reason codes provide additional context for human reviewers:
 | `GOOD_POSITION_LOW_CTR` | 38,903 |
 | **Total** | **331,436** |
 
-**[!!GRAFIK 6 - 05_reason_code_distribution.png]**
+![Figure 6. Reason Code Distribution](figures/05_reason_code_distribution.png)
 
 *Figure 6. Distribution of reason codes in the ranked action queue.*
 
