@@ -1,0 +1,54 @@
+{
+  "experiment": "Random Forest",
+  "evaluation": {
+    "split": "client_grouped",
+    "test_size": 0.2,
+    "random_state": 42,
+    "roc_auc": 0.921432,
+    "average_precision": 0.6806,
+    "accuracy": 0.832379,
+    "precision": 0.509681,
+    "recall": 0.932015,
+    "f1_score": 0.658988
+  },
+  "confusion_matrix": {
+    "true_negative": 20486,
+    "false_positive": 4761,
+    "false_negative": 361,
+    "true_positive": 4949
+  },
+  "classification_report": {
+    "no_opportunity": {
+      "precision": 0.98,
+      "recall": 0.81,
+      "f1_score": 0.89,
+      "support": 25247
+    },
+    "future_opportunity": {
+      "precision": 0.51,
+      "recall": 0.93,
+      "f1_score": 0.66,
+      "support": 5310
+    }
+  },
+  "model_configuration": {
+    "n_estimators": 200,
+    "max_depth": 12,
+    "min_samples_leaf": 20,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "preprocessing": {
+    "imputation": "median",
+    "implementation": "scikit-learn Pipeline",
+    "imputer_fit": "training data only"
+  },
+  "feature_importance": {
+    "gsc_impressions": 0.618917,
+    "gsc_avg_position": 0.17919,
+    "march_ctr": 0.10272,
+    "gsc_clicks": 0.069861,
+    "ga4_pageviews": 0.026835,
+    "ga4_engaged_sessions": 0.002477
+  }
+}

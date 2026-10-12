@@ -1,0 +1,20 @@
+{
+  "experiment": "Validation Comparison",
+  "random_split": {
+    "train_rows": 265148,
+    "test_rows": 66288,
+    "client_overlap": 55,
+    "roc_auc": 0.914363,
+    "average_precision": 0.663663
+  },
+  "client_grouped_split": {
+    "train_rows": 300879,
+    "test_rows": 30557,
+    "train_clients": 44,
+    "test_clients": 11,
+    "client_overlap": 0,
+    "roc_auc": 0.92138,
+    "average_precision": 0.679493
+  },
+  "note": "This file records the separate validation audit comparison. It is not the same run as the final capstone model_metrics.json evaluation."
+}

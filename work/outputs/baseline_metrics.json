@@ -1,0 +1,11 @@
+{
+  "experiment": "Rule-Based Baseline",
+  "evaluation": {
+    "split": "client_grouped",
+    "test_size": 0.2,
+    "random_state": 42,
+    "roc_auc": 0.738707,
+    "average_precision": 0.318966
+  },
+  "note": "Evaluated on the same client-grouped test split as the Random Forest model."
+}
