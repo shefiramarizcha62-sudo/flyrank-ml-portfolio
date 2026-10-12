@@ -79,6 +79,15 @@ The training set contained 300,879 observations from 44 clients, while the test 
 The target distribution consisted of 280,002 negative observations (84.48%) and 51,434 positive observations (15.52%). This class imbalance was considered when interpreting the evaluation results. Considering the imbalanced target distribution, Average Precision (AP) was also used to evaluate the model's precision-recall performance. This metric complements ROC-AUC by providing an evaluation perspective focused on the positive class, following the considerations discussed by Saito and Rehmsmeier [4].
 
 The Random Forest achieved a ROC-AUC of 0.921432 and an Average Precision of 0.680600. The rule-based baseline achieved a ROC-AUC of 0.738707 and an Average Precision of 0.318966 on the same test set.
+**Table 1. Model Performance Comparison**
+
+| Model | ROC-AUC | Average Precision |
+|---|---:|---:|
+| Rule-Based Baseline | 0.738707 | 0.318966 |
+| Random Forest | 0.921432 | 0.680600 |
+
+![Model Performance Comparison](outputs/paper_figures/01_model_performance_comparison.png)
+*Figure X. Performance comparison between the rule-based baseline and Random Forest.*
 
 At a classification threshold of 0.5, the Random Forest achieved an accuracy of 0.832379, precision of 0.509681, recall of 0.932015, and F1-score of 0.658988.
 
