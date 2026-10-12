@@ -1,0 +1,353 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Content Opportunity Scoring for Search Performance — a machine-learning capstone research paper."><meta name="author" content="Shefira Marizcha"><title>Content Opportunity Scoring for Search Performance</title><link rel="stylesheet" href="paper.css"></head><body>
+<header class="hero"><div class="hero-inner"><div class="eyebrow"><span class="eyebrow-dot"></span> FLYRANK · MACHINE LEARNING CAPSTONE</div><h1>Content Opportunity Scoring for Search Performance</h1><p class="hero-subtitle">A research paper on prioritizing content review through observable search and engagement signals.</p><div class="meta-row"><span><b>Author</b>Shefira Marizcha</span><span><b>Lane</b>Refresh / Content Opportunity Scoring</span><span><b>Date</b>13-October-2026</span></div><div class="hero-links"><a href="https://github.com/shefiramarizcha62-sudo/flyrank-ml-portfolio.git" target="_blank" rel="noopener noreferrer">View project repository ↗</a><span>Research · Search Intelligence · Content Scoring</span></div></div></header>
+<div class="layout"><aside class="sidebar"><div class="sidebar-label">ON THIS PAGE</div><nav><a href="#section-0">Abstract</a><a href="#section-1">1. Problem framing</a><a href="#section-2">2. Data safety</a><a href="#section-3">3. Baseline</a><a href="#section-4">4. Model / analysis</a><a href="#section-5">5. Evaluation</a><a href="#section-6">6. Interpretation</a><a href="#section-7">7. Recommendation</a><a href="#section-8">8. Reproducibility</a><a href="#section-9">9. Acknowledgments &amp; data credit</a></nav><div class="sidebar-note">Human-in-the-loop decision support<br>Not an automated content optimization system.</div></aside><main class="article"><div class="article-top"><span>RESEARCH PAPER</span><span>OCTOBER 2026</span></div><article class="prose"><h2 class="paper-heading" id="section-0">Abstract</h2>
+<p>This study investigates how observable search and content performance signals can be used to prioritize client-content pairs for human review. The study uses March 2026 search and engagement data from the FlyRank internship warehouse and defines a future opportunity proxy based on April 2026 impression and click-through rate thresholds. A Random Forest classifier using six performance features was evaluated through a client-grouped train-test split and compared with a rule-based baseline on the same test set. The Random Forest achieved a ROC-AUC of 0.921432 and an Average Precision of 0.680600, outperforming the baseline scores of 0.738707 and 0.318966, respectively. The resulting scoring approach is intended to support the prioritization of content and SEO reviews through ranked recommendations, rather than to establish causal improvements in search performance.</p>
+<h2 class="paper-heading" id="section-1">1. Problem framing</h2>
+<p>Organic search performance provides important signals for evaluating how content is exposed in search results and how users interact with it. Metrics such as impressions, clicks, click-through rate (CTR), and average search position represent different aspects of search visibility and engagement. Previous research has examined the relationship between search engine optimization and organic traffic [1]. Strzelecki and Miklosik [2] further investigated click-through rates in Google organic search results using clicks and impressions data, demonstrating that CTR varies across search result positions and device types. These metrics provide a basis for examining content performance and identifying pages that receive search exposure but generate relatively limited click engagement.</p>
+<p>For content teams managing large portfolios of web pages, identifying which content should be reviewed first is a practical challenge. Reviewing every page individually can require substantial time and resources, while prioritization based on a single metric may overlook the relationships between search visibility, position, and user engagement. Therefore, a systematic approach that considers multiple performance signals is needed to support the identification and prioritization of content requiring further investigation.</p>
+<p>Machine learning can support this process by identifying patterns across multiple performance indicators. Random Forest, introduced by Breiman [3], is an ensemble learning method that constructs multiple decision trees using bootstrap samples and randomized feature selection. The predictions from individual trees are aggregated to produce the final classification. This approach provides a suitable foundation for analyzing relationships among multiple numerical performance indicators in this study. However, model evaluation requires particular attention when the target classes are imbalanced. For imbalanced classification problems, precision-recall analysis provides an informative evaluation perspective because it focuses on the relationship between precision and recall for the positive class. Saito and Rehmsmeier [4] demonstrate that precision-recall plots can reveal performance differences that may be less apparent in ROC plots when evaluating classifiers on imbalanced datasets. Furthermore, model evaluation should consider dependencies among observations that belong to the same group. Roberts et al. [5] explain that random data splitting may produce overly optimistic performance estimates when observations share hierarchical or grouped structures. This consideration is relevant to datasets containing multiple content items associated with the same client, motivating the use of client-grouped data splitting in this study.</p>
+<p>Although previous studies have examined organic search traffic and click behavior, this study focuses on a related operational problem: prioritizing client-content pairs for content and search engine optimization (SEO) review using historical performance signals. The study develops a content opportunity scoring approach that uses March 2026 search and engagement data as input features and an April 2026 performance condition as a proxy outcome. A pair is assigned to the future opportunity class when its April impressions exceed 100 and its CTR is below 0.001. This definition represents an observable performance condition used for classification, rather than verified evidence that refreshing the content would improve its performance.</p>
+<p>The unit of analysis is a client-content pair, with each observation representing one content item associated with a client. The proposed approach produces a model score and ranking, accompanied by reason codes and recommended actions, to support content and SEO reviewers in prioritizing candidates for further investigation. The intended decision is to determine which client-content pairs should receive attention first, particularly those showing substantial search visibility but relatively low click engagement. A false positive may lead reviewers to spend time examining content that does not require immediate attention, whereas a false negative may cause a potentially relevant content opportunity to be overlooked. Accordingly, the proposed system is designed as a human-in-the-loop decision-support tool rather than an automated content optimization system.</p>
+<p>The contributions of this study are threefold. First, it develops a transparent rule-based baseline and compares its performance with a Random Forest classifier using the same evaluation data. Second, it applies client-grouped train-test splitting to evaluate model performance on clients excluded from training. Third, it translates model scores into a ranked action queue with reason codes and recommended actions to support practical content review prioritization. The study does not aim to predict Google's ranking algorithm, establish causal relationships between content changes and search performance, or demonstrate the actual effectiveness of content refresh activities.</p>
+<h2 class="paper-heading" id="section-2">2. Data safety</h2>
+<p>The study uses the <code>FlyRank/internship-warehouse</code> dataset, specifically the <code>fact_content_daily_performance</code> table. The observation period covers March 1–31, 2026, while April 1–30, 2026 is used to construct the proxy outcome.</p>
+<p>The March dataset contains 9,841,378 raw records, which were aggregated into 331,437 client-content pairs. The April dataset contains 10,424,730 raw records. After joining the aggregated March and April data using the client and content identifiers, 331,436 pairs remained for modeling.</p>
+<p><strong>Table 1. Dataset Overview</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dataset</td>
+<td><code>FlyRank/internship-warehouse</code></td>
+</tr>
+<tr>
+<td>Source table</td>
+<td><code>fact_content_daily_performance</code></td>
+</tr>
+<tr>
+<td>Observation period</td>
+<td>March 1–31, 2026</td>
+</tr>
+<tr>
+<td>Outcome period</td>
+<td>April 1–30, 2026</td>
+</tr>
+<tr>
+<td>March raw records</td>
+<td>9,841,378</td>
+</tr>
+<tr>
+<td>April raw records</td>
+<td>10,424,730</td>
+</tr>
+<tr>
+<td>March aggregated pairs</td>
+<td>331,437</td>
+</tr>
+<tr>
+<td>Final modeling pairs</td>
+<td>331,436</td>
+</tr>
+<tr>
+<td>Unique client-content pairs</td>
+<td>331,436</td>
+</tr>
+<tr>
+<td>Input features</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Missing <code>gsc_avg_position</code></td>
+<td>46.68% (154,699 values)</td>
+</tr>
+</tbody>
+</table></div>
+<p>March features were constructed by aggregating impressions, clicks, pageviews, and engaged sessions using summation, while average search position was calculated using the mean. March CTR was calculated as clicks divided by impressions, with zero assigned when impressions were zero. The April outcome was constructed from aggregated impressions and clicks.</p>
+<p>The modeling dataset contains 331,436 unique client-content pairs and six input features:</p>
+<ul>
+<li><code>gsc_impressions</code></li>
+<li><code>gsc_clicks</code></li>
+<li><code>march_ctr</code></li>
+<li><code>gsc_avg_position</code></li>
+<li><code>ga4_pageviews</code></li>
+<li><code>ga4_engaged_sessions</code></li>
+</ul>
+<p>The <code>gsc_avg_position</code> feature contains 154,699 missing values, representing 46.68% of the modeling dataset. Missing values were handled using median imputation within a machine learning pipeline fitted on the training data.</p>
+<p>Client and content identifiers were retained only for joining and grouping observations. They were not used as model input features. April outcome fields, target labels, baseline scores, and reason codes were excluded from the model features to prevent target leakage. Only March performance features were used as model inputs.</p>
+<p>The proxy target was derived from April performance and was not included among the March input features. The public report excludes client-identifying information, private queries, raw exports, and sensitive identifiers.</p>
+<h2 class="paper-heading" id="section-3">3. Baseline</h2>
+<p>A rule-based scoring approach was developed as the baseline for comparison with the Random Forest model. The baseline combines three percentile-based components:</p>
+<ol>
+<li>Visibility score, calculated from the percentile rank of impressions.</li>
+<li>CTR opportunity, calculated as one minus the percentile rank of CTR.</li>
+<li>Position opportunity, calculated as one minus the percentile rank of positive average search position. Invalid or non-positive position values receive zero.</li>
+</ol>
+<p>The baseline score is calculated as the average of these three components. This approach provides a transparent comparison because it uses observable March performance signals and does not require model training.</p>
+<p>The baseline was evaluated on the same client-grouped test set used for the Random Forest model. It achieved a ROC-AUC of 0.738707 and an Average Precision of 0.318966.</p>
+<h2 class="paper-heading" id="section-4">4. Model / analysis</h2>
+<p>This study uses a Random Forest classifier to estimate the likelihood of a predefined future opportunity condition. Random Forest was selected as an ensemble learning method capable of modeling relationships among multiple numerical performance features. The ensemble structure allows the classifier to combine predictions from multiple decision trees, while randomized feature selection introduces variation among the trees during model construction [3].</p>
+<p>The model uses six March 2026 input features: <code>gsc_impressions</code>, <code>gsc_clicks</code>, <code>march_ctr</code>, <code>gsc_avg_position</code>, <code>ga4_pageviews</code>, and <code>ga4_engaged_sessions</code>.</p>
+<p>The proxy target, <code>future_opportunity</code>, is defined as 1 when a client-content pair has more than 100 April impressions and an April CTR below 0.001; otherwise, it is defined as 0.</p>
+<p>The model uses median imputation followed by a Random Forest classifier. The classifier configuration consists of 200 trees, a maximum depth of 12, a minimum of 20 samples per leaf, balanced class weights, and a random state of 42. The imputation step is fitted using training data only.</p>
+<p>The final model is trained using all available labeled observations to generate the retrospective ranked action queue. This full-data model is used for recommendation generation, while the held-out test evaluation is reported separately.</p>
+<h2 class="paper-heading" id="section-5">5. Evaluation</h2>
+<p>The model was evaluated using a client-grouped train-test split to prevent observations from the same client from appearing in both training and testing sets. The split used 80% of the data for training and 20% for testing, with a random state of 42.</p>
+<p>The training set contained 300,879 observations from 44 clients, while the test set contained 30,557 observations from 11 clients. No client overlap was found between the two sets.</p>
+<p>The target distribution consisted of 280,002 negative observations (84.48%) and 51,434 positive observations (15.52%). This class imbalance was considered when interpreting the evaluation results. Considering the imbalanced target distribution, Average Precision (AP) was also used to evaluate the model's precision-recall performance. This metric complements ROC-AUC by providing an evaluation perspective focused on the positive class, following the considerations discussed by Saito and Rehmsmeier [4].</p>
+<p><strong>Table 2. Target Class Distribution</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Target Class</th>
+<th style="text-align:right">Count</th>
+<th style="text-align:right">Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No Opportunity</td>
+<td style="text-align:right">280,002</td>
+<td style="text-align:right">84.48%</td>
+</tr>
+<tr>
+<td>Future Opportunity</td>
+<td style="text-align:right">51,434</td>
+<td style="text-align:right">15.52%</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>331,436</strong></td>
+<td style="text-align:right"><strong>100.00%</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The Random Forest achieved a ROC-AUC of 0.921432 and an Average Precision of 0.680600. The rule-based baseline achieved a ROC-AUC of 0.738707 and an Average Precision of 0.318966 on the same test set.</p>
+<p><strong>Table 3. Model Performance Comparison</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Experiment</th>
+<th style="text-align:right">ROC-AUC</th>
+<th style="text-align:right">Average Precision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rule-Based Baseline</td>
+<td style="text-align:right">0.738707</td>
+<td style="text-align:right">0.318966</td>
+</tr>
+<tr>
+<td>Random Forest</td>
+<td style="text-align:right"><strong>0.921432</strong></td>
+<td style="text-align:right"><strong>0.680600</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="Figure 1. Model Performance Comparison" class="paper-figure" loading="lazy" src="work/figures/01_model_performance_comparison.png"/></p>
+<p><em>Figure 1. Performance comparison between the rule-based baseline and Random Forest.</em></p>
+<p>At a classification threshold of 0.5, the Random Forest achieved an accuracy of 0.832379, precision of 0.509681, recall of 0.932015, and F1-score of 0.658988.</p>
+<p><strong>Table 4. Random Forest Classification Metrics</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th style="text-align:right">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Accuracy</td>
+<td style="text-align:right">0.832379</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td style="text-align:right">0.509681</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td style="text-align:right">0.932015</td>
+</tr>
+<tr>
+<td>F1-score</td>
+<td style="text-align:right">0.658988</td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="Figure 2. Classification Metrics" class="paper-figure" loading="lazy" src="work/figures/02_classification_metrics.png"/></p>
+<p><em>Figure 2. Classification metrics of the Random Forest model at a threshold of 0.5.</em></p>
+<p>The confusion matrix contained 20,486 true negatives, 4,761 false positives, 361 false negatives, and 4,949 true positives. The results indicate that the model identified most positive proxy cases, while also producing false-positive predictions that require human verification.</p>
+<p><strong>Table 5. Confusion Matrix</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Actual / Predicted</th>
+<th style="text-align:right">Negative</th>
+<th style="text-align:right">Positive</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Negative</strong></td>
+<td style="text-align:right">20,486 (TN)</td>
+<td style="text-align:right">4,761 (FP)</td>
+</tr>
+<tr>
+<td><strong>Positive</strong></td>
+<td style="text-align:right">361 (FN)</td>
+<td style="text-align:right">4,949 (TP)</td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="Figure 3. Confusion Matrix" class="paper-figure" loading="lazy" src="work/figures/03_confusion_matrix.png"/></p>
+<p><em>Figure 3. Confusion matrix of the Random Forest classifier at a threshold of 0.5.</em></p>
+<h2 class="paper-heading" id="section-6">6. Interpretation</h2>
+<p>The feature importance results indicate that <code>gsc_impressions</code> contributed the largest share of the Random Forest model's feature importance at 61.89%. This was followed by <code>gsc_avg_position</code> at 17.92%, <code>march_ctr</code> at 10.27%, <code>gsc_clicks</code> at 6.99%, <code>ga4_pageviews</code> at 2.68%, and <code>ga4_engaged_sessions</code> at 0.25%.</p>
+<p><strong>Table 6. Random Forest Feature Importance</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align:right">Importance</th>
+<th style="text-align:right">Importance (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gsc_impressions</code></td>
+<td style="text-align:right">0.618917</td>
+<td style="text-align:right">61.89</td>
+</tr>
+<tr>
+<td><code>gsc_avg_position</code></td>
+<td style="text-align:right">0.179190</td>
+<td style="text-align:right">17.92</td>
+</tr>
+<tr>
+<td><code>march_ctr</code></td>
+<td style="text-align:right">0.102720</td>
+<td style="text-align:right">10.27</td>
+</tr>
+<tr>
+<td><code>gsc_clicks</code></td>
+<td style="text-align:right">0.069861</td>
+<td style="text-align:right">6.99</td>
+</tr>
+<tr>
+<td><code>ga4_pageviews</code></td>
+<td style="text-align:right">0.026835</td>
+<td style="text-align:right">2.68</td>
+</tr>
+<tr>
+<td><code>ga4_engaged_sessions</code></td>
+<td style="text-align:right">0.002477</td>
+<td style="text-align:right">0.25</td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="Figure 4. Feature Importance" class="paper-figure" loading="lazy" src="work/figures/04_feature_importance.png"/></p>
+<p><em>Figure 4. Relative feature importance in the Random Forest model.</em></p>
+<p>These results show that search visibility and search position were the most influential features in the fitted model. However, feature importance represents relative contribution within the model and does not establish causal relationships or the direction of an individual feature's effect.</p>
+<p>The model's Average Precision was higher than that of the rule-based baseline, indicating improved positive-class ranking performance under the evaluated test conditions. Nevertheless, the positive class represented only 15.52% of the dataset, and the classification results included 4,761 false positives and 361 false negatives.</p>
+<p>Overall, the findings suggest that combining search and content performance signals can support the prioritization of content candidates associated with the defined future opportunity condition. The findings should be interpreted within the specific March-to-April observation window and proxy target definition.</p>
+<h2 class="paper-heading" id="section-7">7. Recommendation</h2>
+<p>The final Random Forest model was trained on all 331,436 available client-content pairs to generate a retrospective ranked action queue. Each pair received a model score and was sorted in descending order of that score, with March impressions used as a secondary sorting criterion.</p>
+<p>The queue contains three recommended action categories: <code>NO_ACTION</code>, <code>REVIEW_CTR</code>, and <code>REVIEW</code>. The <code>NO_ACTION</code> category contains 191,301 pairs, <code>REVIEW_CTR</code> contains 86,158 pairs, and <code>REVIEW</code> contains 53,977 pairs.</p>
+<p><strong>Table 7. Recommended Action Distribution</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Recommended Action</th>
+<th style="text-align:right">Number of Pairs</th>
+<th style="text-align:right">Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NO_ACTION</code></td>
+<td style="text-align:right">191,301</td>
+<td style="text-align:right">57.72%</td>
+</tr>
+<tr>
+<td><code>REVIEW_CTR</code></td>
+<td style="text-align:right">86,158</td>
+<td style="text-align:right">26.00%</td>
+</tr>
+<tr>
+<td><code>REVIEW</code></td>
+<td style="text-align:right">53,977</td>
+<td style="text-align:right">16.29%</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>331,436</strong></td>
+<td style="text-align:right"><strong>100.00%</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="Figure 5. Recommended Action Distribution" class="paper-figure" loading="lazy" src="work/figures/06_recommended_action_distribution.png"/></p>
+<p><em>Figure 5. Distribution of recommended actions in the ranked action queue.</em></p>
+<p>Reason codes provide additional context for human reviewers:</p>
+<ul>
+<li><code>HIGH_IMPRESSIONS_LOW_CTR</code>: content with more than 100 impressions and CTR below 0.001, recommended for CTR-related review.</li>
+<li><code>GOOD_POSITION_LOW_CTR</code>: content with a positive average position of 10 or better and CTR below 0.001, recommended for title and meta description review.</li>
+<li><code>HIGH_VISIBILITY</code>: content with more than 100 impressions, recommended for general content performance review.</li>
+<li><code>REVIEW</code>: no specific rule-based opportunity signal was identified.</li>
+</ul>
+<p><strong>Table 8. Reason Code Distribution</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Reason Code</th>
+<th style="text-align:right">Number of Pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REVIEW</code></td>
+<td style="text-align:right">191,301</td>
+</tr>
+<tr>
+<td><code>HIGH_VISIBILITY</code></td>
+<td style="text-align:right">53,977</td>
+</tr>
+<tr>
+<td><code>HIGH_IMPRESSIONS_LOW_CTR</code></td>
+<td style="text-align:right">47,255</td>
+</tr>
+<tr>
+<td><code>GOOD_POSITION_LOW_CTR</code></td>
+<td style="text-align:right">38,903</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>331,436</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="Figure 6. Reason Code Distribution" class="paper-figure" loading="lazy" src="work/figures/05_reason_code_distribution.png"/></p>
+<p><em>Figure 6. Distribution of reason codes in the ranked action queue.</em></p>
+<p>A FlyRank editor can use the queue to select candidates for further investigation. For example, candidates with high impressions and low CTR may be examined for search snippet relevance, title and meta description alignment, and consistency with search intent.</p>
+<p>The ranked queue is a retrospective decision-support artifact generated using the March-April labeled dataset. Its model scores represent estimated likelihoods of the defined proxy outcome, not probabilities that content refresh actions will improve search performance. Human review is required before any content changes are considered.</p>
+<h2 class="paper-heading" id="section-8">8. Reproducibility</h2>
+<p>The project is organized into separate notebooks for each internship assignment and the final capstone implementation. The weekly notebooks (W1–W7) and the capstone notebook are stored in <code>work/notebooks/</code>, while the research report and visualization assets are maintained in <code>work/</code>.</p>
+<p>The project dependencies are documented in the root-level <code>requirements.txt</code>, including pandas, NumPy, scikit-learn, Matplotlib, ReportLab, DuckDB, and Hugging Face Hub. The listed versions specify minimum requirements rather than exact pinned versions.</p>
+<p>The aggregate experiment results are stored in <code>work/outputs/</code>. These include <code>baseline_metrics.json</code> for the rule-based baseline, <code>model_metrics.json</code> for the final Random Forest evaluation, <code>validation_metrics.json</code> for the validation comparison, and <code>action_queue_summary.json</code> for the ranked action queue summary. These files provide supporting evidence for the reported evaluation metrics and recommendation distributions.</p>
+<p>The modeling workflow uses a client-grouped train-test split with <code>GroupShuffleSplit</code>, configured with <code>test_size=0.20</code> and <code>random_state=42</code>. The Random Forest model uses 200 estimators, a maximum depth of 12, and a minimum of 20 samples per leaf. Median imputation is integrated into a scikit-learn Pipeline to ensure that imputation parameters are learned from the training data.</p>
+<p>Dataset access requires the appropriate Hugging Face permissions and authentication. The access token is managed through Google Colab Secrets rather than being stored directly in the notebook.</p>
+<p>The evaluation represents one client-grouped holdout split using March features and April outcomes. It is not a sealed evaluation or a time-series validation across multiple periods. Reproducing the results requires access to the dataset, the required credentials, and a compatible Python environment.</p>
+<h2 class="paper-heading" id="section-9">9. Acknowledgments &amp; data credit</h2>
+<p>This work was developed as part of the FlyRank Machine Learning Internship Capstone. The analysis uses the <strong><a href="https://flyrank.ai" rel="noopener noreferrer" target="_blank">Built on the FlyRank ML Internship dataset</a></strong> as its data source.</p>
+<h2 class="paper-heading" id="references">References</h2>
+<p>[1] M. R. Baye, B. de los Santos, and M. R. Wildenbeest, “Search Engine Optimization: What Drives Organic Traffic to Retail Sites?,” <em>Journal of Economics &amp; Management Strategy</em>, vol. 25, no. 1, pp. 6–31, 2016. doi: 10.1111/jems.12141.</p>
+<p>[2] A. Strzelecki and A. Miklosik, “Device-dependent click-through rate estimation in Google organic search results based on clicks and impressions data,” <em>Aslib Journal of Information Management</em>, vol. 77, no. 3, pp. 513–529, 2025. doi: 10.1108/AJIM-04-2023-0107.</p>
+<p>[3] L. Breiman, “Random Forests,” <em>Machine Learning</em>, vol. 45, no. 1, pp. 5–32, 2001. doi: 10.1023/A:1010933404324.</p>
+<p>[4] T. Saito and M. Rehmsmeier, “The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets,” <em>PLOS ONE</em>, vol. 10, no. 3, Art. no. e0118432, 2015. doi: 10.1371/journal.pone.0118432.</p>
+<p>[5] D. R. Roberts et al., “Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure,” <em>Ecography</em>, vol. 40, no. 8, pp. 913–929, 2017. doi: 10.1111/ecog.02881.</p>
+</article><footer class="page-footer"><div><b>Built on the FlyRank ML Internship dataset</b><p>Data source acknowledgment</p></div><a href="https://flyrank.ai" target="_blank" rel="noopener noreferrer">FlyRank ↗</a></footer></main></div>
+<script>const links=[...document.querySelectorAll('.sidebar nav a')];const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);if('IntersectionObserver' in window){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-15% 0px -75% 0px'});targets.forEach(t=>io.observe(t));}</script></body></html>
