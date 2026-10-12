@@ -2,8 +2,8 @@
 
 **Author: Shefira Marizcha**  
 **Lane:** Refresh / Content Opportunity Scoring  
-**Repo: https://github.com/shefiramarizcha62-sudo/flyrank-ml-portfolio.git**  
-**Date: 13-October-2026**
+**Repo:** https://github.com/shefiramarizcha62-sudo/flyrank-ml-portfolio.git  
+**Date:** 13-October-2026
 
 ## 0. Abstract
 
@@ -28,6 +28,21 @@ The contributions of this study are threefold. First, it develops a transparent 
 The study uses the `FlyRank/internship-warehouse` dataset, specifically the `fact_content_daily_performance` table. The observation period covers March 1–31, 2026, while April 1–30, 2026 is used to construct the proxy outcome.
 
 The March dataset contains 9,841,378 raw records, which were aggregated into 331,437 client-content pairs. The April dataset contains 10,424,730 raw records. After joining the aggregated March and April data using the client and content identifiers, 331,436 pairs remained for modeling.
+
+**Table 1. Dataset Overview**
+
+| Attribute | Description | Value |
+|---|---|---:|
+| Dataset | FlyRank internship warehouse | — |
+| Source table | `fact_content_daily_performance` | — |
+| March observation period | March 1–31, 2026 | — |
+| April outcome period | April 1–30, 2026 | — |
+| March raw records | Raw March observations | 9,841,378 |
+| April raw records | Raw April observations | 10,424,730 |
+| March aggregated pairs | Aggregated client-content pairs | 331,437 |
+| Final modeling pairs | Pairs remaining after March-April join | 331,436 |
+| Input features | March performance features | 6 |
+| Missing `gsc_avg_position` | Missing values in the modeling dataset | 154,699 (46.68%) |
 
 March features were constructed by aggregating impressions, clicks, pageviews, and engaged sessions using summation, while average search position was calculated using the mean. March CTR was calculated as clicks divided by impressions, with zero assigned when impressions were zero. The April outcome was constructed from aggregated impressions and clicks.
 
@@ -78,24 +93,73 @@ The training set contained 300,879 observations from 44 clients, while the test 
 
 The target distribution consisted of 280,002 negative observations (84.48%) and 51,434 positive observations (15.52%). This class imbalance was considered when interpreting the evaluation results. Considering the imbalanced target distribution, Average Precision (AP) was also used to evaluate the model's precision-recall performance. This metric complements ROC-AUC by providing an evaluation perspective focused on the positive class, following the considerations discussed by Saito and Rehmsmeier [4].
 
+**Table 2. Target Class Distribution**
+
+| Target Class | Number of Observations | Percentage |
+|---|---:|---:|
+| Negative (No Future Opportunity) | 280,002 | 84.48% |
+| Positive (Future Opportunity) | 51,434 | 15.52% |
+| **Total** | **331,436** | **100.00%** |
+
 The Random Forest achieved a ROC-AUC of 0.921432 and an Average Precision of 0.680600. The rule-based baseline achieved a ROC-AUC of 0.738707 and an Average Precision of 0.318966 on the same test set.
-**Table 1. Model Performance Comparison**
+
+**Table 3. Model Performance Comparison**
 
 | Model | ROC-AUC | Average Precision |
 |---|---:|---:|
 | Rule-Based Baseline | 0.738707 | 0.318966 |
-| Random Forest | 0.921432 | 0.680600 |
+| Random Forest | **0.921432** | **0.680600** |
 
-![Model Performance Comparison](outputs/paper_figures/01_model_performance_comparison.png)
-*Figure X. Performance comparison between the rule-based baseline and Random Forest.*
+[01_model_performance_comparison.png]
+
+*Figure 1. Performance comparison between the rule-based baseline and Random Forest.*
 
 At a classification threshold of 0.5, the Random Forest achieved an accuracy of 0.832379, precision of 0.509681, recall of 0.932015, and F1-score of 0.658988.
 
+**Table 4. Random Forest Classification Metrics at Threshold 0.5**
+
+| Metric | Value |
+|---|---:|
+| Accuracy | 0.832379 |
+| Precision | 0.509681 |
+| Recall | 0.932015 |
+| F1-score | 0.658988 |
+
+[02_classification_metrics.png]
+
+*Figure 2. Classification metrics of the Random Forest model at a threshold of 0.5.*
+
 The confusion matrix contained 20,486 true negatives, 4,761 false positives, 361 false negatives, and 4,949 true positives. The results indicate that the model identified most positive proxy cases, while also producing false-positive predictions that require human verification.
+
+**Table 5. Confusion Matrix**
+
+| Actual / Predicted | Negative | Positive |
+|---|---:|---:|
+| **Negative** | 20,486 (TN) | 4,761 (FP) |
+| **Positive** | 361 (FN) | 4,949 (TP) |
+
+[03_confusion_matrix.png]
+
+*Figure 3. Confusion matrix of the Random Forest classifier at a threshold of 0.5.*
 
 ## 6. Interpretation
 
 The feature importance results indicate that `gsc_impressions` contributed the largest share of the Random Forest model's feature importance at 61.89%. This was followed by `gsc_avg_position` at 17.92%, `march_ctr` at 10.27%, `gsc_clicks` at 6.99%, `ga4_pageviews` at 2.68%, and `ga4_engaged_sessions` at 0.25%.
+
+**Table 6. Random Forest Feature Importance**
+
+| Feature | Importance | Percentage |
+|---|---:|---:|
+| `gsc_impressions` | 0.618917 | 61.89% |
+| `gsc_avg_position` | 0.179190 | 17.92% |
+| `march_ctr` | 0.102720 | 10.27% |
+| `gsc_clicks` | 0.069861 | 6.99% |
+| `ga4_pageviews` | 0.026835 | 2.68% |
+| `ga4_engaged_sessions` | 0.002477 | 0.25% |
+
+[04_feature_importance.png]
+
+*Figure 4. Relative feature importance in the Random Forest model.*
 
 These results show that search visibility and search position were the most influential features in the fitted model. However, feature importance represents relative contribution within the model and does not establish causal relationships or the direction of an individual feature's effect.
 
@@ -109,12 +173,39 @@ The final Random Forest model was trained on all 331,436 available client-conten
 
 The queue contains three recommended action categories: `NO_ACTION`, `REVIEW_CTR`, and `REVIEW`. The `NO_ACTION` category contains 191,301 pairs, `REVIEW_CTR` contains 86,158 pairs, and `REVIEW` contains 53,977 pairs.
 
+**Table 7. Recommended Action Distribution**
+
+| Recommended Action | Number of Pairs | Percentage |
+|---|---:|---:|
+| `NO_ACTION` | 191,301 | 57.72% |
+| `REVIEW_CTR` | 86,158 | 26.00% |
+| `REVIEW` | 53,977 | 16.29% |
+| **Total** | **331,436** | **100.00%** |
+
+[06_recommended_action_distribution.png]
+
+*Figure 5. Distribution of recommended actions in the ranked action queue.*
+
 Reason codes provide additional context for human reviewers:
 
 - `HIGH_IMPRESSIONS_LOW_CTR`: content with more than 100 impressions and CTR below 0.001, recommended for CTR-related review.
 - `GOOD_POSITION_LOW_CTR`: content with a positive average position of 10 or better and CTR below 0.001, recommended for title and meta description review.
 - `HIGH_VISIBILITY`: content with more than 100 impressions, recommended for general content performance review.
 - `REVIEW`: no specific rule-based opportunity signal was identified.
+
+**Table 8. Reason Code Distribution**
+
+| Reason Code | Number of Pairs |
+|---|---:|
+| `REVIEW` | 191,301 |
+| `HIGH_VISIBILITY` | 53,977 |
+| `HIGH_IMPRESSIONS_LOW_CTR` | 47,255 |
+| `GOOD_POSITION_LOW_CTR` | 38,903 |
+| **Total** | **331,436** |
+
+[05_reason_code_distribution.png]
+
+*Figure 6. Distribution of reason codes in the ranked action queue.*
 
 A FlyRank editor can use the queue to select candidates for further investigation. For example, candidates with high impressions and low CTR may be examined for search snippet relevance, title and meta description alignment, and consistency with search intent.
 
@@ -133,7 +224,6 @@ Exact execution commands, dependency versions, and repository paths will be docu
 ## 9. Acknowledgments & data credit
 
 This work was developed as part of the FlyRank Machine Learning Internship Capstone. The analysis uses the **[Built on the FlyRank ML Internship dataset](https://flyrank.ai)** as its data source.
-
 
 ## References
 
