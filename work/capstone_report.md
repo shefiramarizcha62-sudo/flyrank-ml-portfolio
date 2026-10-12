@@ -218,6 +218,8 @@ The project is organized into separate notebooks for each internship assignment 
 
 The project dependencies are documented in the root-level `requirements.txt`, including pandas, NumPy, scikit-learn, Matplotlib, ReportLab, DuckDB, and Hugging Face Hub. The listed versions specify minimum requirements rather than exact pinned versions.
 
+The aggregate experiment results are stored in `work/outputs/`. These include `baseline_metrics.json` for the rule-based baseline, `model_metrics.json` for the final Random Forest evaluation, `validation_metrics.json` for the validation comparison, and `action_queue_summary.json` for the ranked action queue summary. These files provide supporting evidence for the reported evaluation metrics and recommendation distributions.
+
 The modeling workflow uses a client-grouped train-test split with `GroupShuffleSplit`, configured with `test_size=0.20` and `random_state=42`. The Random Forest model uses 200 estimators, a maximum depth of 12, and a minimum of 20 samples per leaf. Median imputation is integrated into a scikit-learn Pipeline to ensure that imputation parameters are learned from the training data.
 
 Dataset access requires the appropriate Hugging Face permissions and authentication. The access token is managed through Google Colab Secrets rather than being stored directly in the notebook.
